@@ -10,18 +10,24 @@ class HelpScreen extends StatefulWidget {
 }
 
 class _HelpScreenState extends State<HelpScreen> {
+  bool pressed = false;
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _navigateToHomeScreen();
+    print('initial, ${pressed}');
   }
 
   _navigateToHomeScreen() async {
+    print(pressed);
     await Future.delayed(
-      Duration(milliseconds: 100000),
-      // () => Navigator.pushNamed(context, MyHomePage.routeName),
-    );
+        const Duration(milliseconds: 5000),
+        //() => Navigator.pushNamed(context, MyHomePage.routeName),
+        (() => Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (BuildContext context) => MyHomePage()))));
   }
 
   @override
@@ -74,6 +80,7 @@ class _HelpScreenState extends State<HelpScreen> {
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 30,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -83,13 +90,28 @@ class _HelpScreenState extends State<HelpScreen> {
                   Container(
                     width: screenWidth * .8,
                     child: const Text(
-                        'This is a simple weather application which tells the weather of your location you entered. You can choose your location after you entered the application and reach home screen. Now, let’s see what the weather is like today.'),
+                        'This is a simple weather application which tells the weather of your location you entered. You can choose your location after you entered the application and reach home screen. Now, let’s see what the weather is like today. This weather app is one of best free weather apps with full features: Local weather'),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, MyHomePage.routeName);
-                    },
-                    child: Text('SKIP!'),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Navigator.pushNamed(context, MyHomePage.routeName);
+                        // pressed = true;
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    MyHomePage()));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            const Color.fromARGB(255, 219, 210, 132),
+                      ),
+                      child: const Text(
+                        'SKIP!',
+                      ),
+                    ),
                   )
                 ],
               ),
