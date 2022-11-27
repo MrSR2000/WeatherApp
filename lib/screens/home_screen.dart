@@ -1,6 +1,5 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:weather_app/data_service.dart';
 import '../model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,40 +16,44 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final _locationTextController = TextEditingController();
   final _dataService = DataService();
+  String? _locationValue;
+  SharedPreferences? prefs;
+  bool _savedLocation = false;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    checkForLocationValue;
+    checkForLocationValue();
   }
 
   checkForLocationValue() async {
-    String location = await getLocationValue() ?? 'kathmandu';
+    prefs = await SharedPreferences.getInstance();
+    print('the location value is "${_locationValue}" guu');
 
+    if (_locationValue == null || _locationValue == '') {
+      _savedLocation = false;
+    } else {
+      _savedLocation = true;
+    }
     setState(() {
-      _locationTextController.text = location;
+      _locationValue = prefs!.getString('locationValue');
     });
   }
 
   WeatherResponse? _response;
 
-  getLocationValue() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    String location = pref.getString('locationValue')!;
-    return location;
-  }
-
   setLocationValue() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
+    final SharedPreferences pref = await SharedPreferences.getInstance();
     pref.setString('locationValue', _locationTextController.text);
+    // print(pref.getString('locationValue'));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Weather'),
+        title: const Text('Weather'),
       ),
       body: Center(
         child: Column(
@@ -70,26 +73,38 @@ class _MyHomePageState extends State<MyHomePage> {
                   )
                 ],
               ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 50),
-              child: SizedBox(
-                width: 150,
-                child: TextField(
-                  controller: _locationTextController,
-                  decoration: const InputDecoration(labelText: 'Location'),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: _search,
-              child: const Text(
-                'Search',
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
-            ),
+            _savedLocation
+                ? Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Text(_locationTextController.text))
+                : SizedBox(
+                    width: 150,
+                    child: TextField(
+                      controller: _locationTextController,
+                      decoration: const InputDecoration(labelText: 'Location'),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+            const SizedBox(height: 15),
+            _savedLocation
+                ? ElevatedButton(
+                    onPressed: updateLocation,
+                    child: const Text(
+                      'Update',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
+                : ElevatedButton(
+                    onPressed: _search,
+                    child: const Text(
+                      'Search',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
           ],
         ),
       ),
@@ -102,6 +117,13 @@ class _MyHomePageState extends State<MyHomePage> {
         await _dataService.getWeather(_locationTextController.text);
     setState(() {
       _response = response;
+      _savedLocation = true;
+    });
+  }
+
+  void updateLocation() {
+    setState(() {
+      _savedLocation = false;
     });
   }
 }
